@@ -3,15 +3,40 @@
 //
 //A classe funciona como um molde para criar produtos
 class Produto{
+
+    #preco;
+    #quantidade;
+
     constructor(nome,preco,quantidade){
         //propriedades do objeto recebidas no momento da criação
         this.nome = nome;
-        this.preco =parseFloat(preco);
-        this.quantidade = parseInt(quantidade);
+        this.#preco = parseFloat(preco);
+        this.#quantidade = parseInt(quantidade);
+
+        //validações
+        if(nome.trim() === ""){
+            throw new Error("O nome do produto não pode estar vazio!");
+        }
+
+        if(this.#preco <= 0){
+            throw new Error("O preço deve ser maior que zero!");
+        }
+
+        if(this.#quantidade <= 0){
+            throw new Error("A quantidade deve ser maior que zero!");
+        }
+    }
+    //getter do preço
+    get preco(){
+        return this.#preco;
+    }
+    //getter da quantidade
+    get quantidade(){
+        return this.#quantidade;
     }
     //método que calcula o subtotal
     calcularSubtotal(){
-        return this.preco*this.quantidade;
+        return this.#preco*this.#quantidade;
     }
 }
 
@@ -38,15 +63,20 @@ formProduto.addEventListener("submit",function(event){
     const quantidadeInput = document.getElementById("quantidade").value;
 
     //2. Criar uma nova instância da classe Produto
-    const novoProduto = new Produto(nomeInput,precoInput,quantidadeInput);
+    try{
+        const novoProduto = new Produto(nomeInput,precoInput,quantidadeInput);
 
+        //3.Adiciona o novo produto ao array
+        listaDeProdutos.push(novoProduto);
 
-    //3.Adiciona o novo produto ao array
-    listaDeProdutos.push(novoProduto);
+        //4. atualiza a exibição da tabela e limpa o formulário
+        renderizarTabela();
+        atualizarTotalEstoque();
+        formProduto.reset();
 
-    //4. atualiza a exibição da tabela e limpa o formulário
-    renderizarTabela();
-    formProduto.reset();
+    }catch(erro){
+        alert(erro.message);
+    }
 });
 
 //
@@ -62,18 +92,18 @@ function renderizarTabela(){
     tabelaBody.innerHTML = "";
 
     //percorre o array de produtos usando forEach
-    listaDeProdutos.forEach((produto)=>{
+    listaDeProdutos.forEach((produto,index)=>{
         //criar uam linha tr dentro da tabela
         const linha = document.createElement("tr");
 
         //preenche o conteúdo da linha com os dados do objeto
         linha.innerHTML = `
             <td>${produto.nome}</td>
-            <td>R$ ${produto.preco.toFixed(2)}</td>
+            <td>R$ ${produto.preco.toFixed(2).replace(".", ",")}</td>
             <td>${produto.quantidade}</td>
-            <td>R$ ${produto.calcularSubtotal().toFixed(2)}</td>
+            <td>R$ ${produto.calcularSubtotal().toFixed(2).replace(".", ",")}</td>
             <td>
-                <button class="btn-remover">Remover</button>
+                <button class="btn-remover" onclick="removerProduto(${index})">Remover</button>
             </td>
         `;
 
@@ -81,3 +111,41 @@ function renderizarTabela(){
         tabelaBody.appendChild(linha);
     })
 }
+
+//
+//DESAFIO 2: Indicadores Financeiros do Estoque
+//
+
+function atualizarTotalEstoque(){
+
+    const total = listaDeProdutos.reduce((soma,produto)=>{
+        return soma + produto.calcularSubtotal();
+    },0);
+
+    document.getElementById("total-estoque").textContent =
+        `Total em Estoque: R$ ${total.toFixed(2).replace(".", ",")}`;
+}
+
+//
+//DESAFIO 3: Gestão Dinâmica
+//
+
+function removerProduto(index){
+
+    listaDeProdutos.splice(index,1);
+
+    renderizarTabela();
+    atualizarTotalEstoque();
+}
+
+
+//botão Limpar Tudo
+const botaoLimpar = document.getElementById("limpar-tabela");
+
+botaoLimpar.addEventListener("click",function(){
+
+    listaDeProdutos.length = 0;
+
+    renderizarTabela();
+    atualizarTotalEstoque();
+});

@@ -46,7 +46,7 @@ label{
 
 input{
     padding: 10px;
-    bottom: 1px solid #ccc;
+    border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
 }
@@ -63,7 +63,7 @@ button{
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: backgroumd-color 0.2s;
+    transition: background-color 0.2s;
 }
 
 .btn-primary{
@@ -105,7 +105,7 @@ table{
 }
 
 th, td{
-    margin: px solid #cbd5e1;
+    border: 1px solid #cbd5e1;
     padding: 10px;
     text-align: center;
 }
@@ -129,4 +129,3 @@ tbody tr:nth-child(even){
 .btn-remover:hover{
     background-color: #dc2626;
 }
- 
