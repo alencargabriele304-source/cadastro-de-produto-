@@ -7,23 +7,24 @@
 body{
     font-family: Arial, sans-serif;
     background-color: #f4f6f9;
-    color: #333;
+    color: #ffffff;
     padding: 20px;
+    background-image: url(image.png);
 }
 
 .container{
     max-width: 650px;
-    background-color: #fff;
+    background-color: #b31e04;
     margin: 30px auto;
     padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px #8686867a;
 }
 
 h1{
     text-align: center;
     margin-bottom: 20px;
-    color: #1e293b;
+    color: #ffffff;
 }
 
 form{
@@ -67,21 +68,21 @@ button{
 }
 
 .btn-primary{
-    background-color: #2563ab;
+    background-color: #000000;
     color: white;
 }
 
 .btn-primary:hover{
-    background-color: #1d4ed8;
+    background-color: #000000;
 }
 
 .btn-danger{
-    background-color: #dc2626;
+    background-color: #830303;
     color: white;
 }
 
 .btn-danger:hover{
-    background-color: #b91c1c;
+    background-color: #000000;
 }
 
 .resumo-container{
@@ -95,7 +96,7 @@ button{
 
 #total-estoque{
     font-size: 18px;
-    color: #0f172a;
+    color: #f3f3f3;
 }
 
 table{
@@ -111,7 +112,7 @@ th, td{
 }
 
 th{
-    background-color: #2563ab;
+    background-color: #000000;
     color: white;
 }
 
