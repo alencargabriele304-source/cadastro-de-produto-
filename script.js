@@ -5,6 +5,8 @@ const campoPreco = document.getElementById("preco");
 const campoQuantidade = document.getElementById("quantidade");
 const campoBusca = document.getElementById("campo-busca");
 
+const listaSugestoes = document.getElementById("sugestoes-produtos");
+
 const tabela = document.querySelector("#tabela-produtos tbody");
 const totalEstoque = document.getElementById("total-estoque");
 const mensagemBusca = document.getElementById("mensagem-busca");
@@ -13,7 +15,7 @@ const botaoLimpar = document.getElementById("limpar-tabela");
 const botaoSalvar = document.getElementById("btn-salvar");
 
 
-// Lista de produtos
+// Lista de produtos salva no navegador
 let listaDeProdutos = JSON.parse(
     localStorage.getItem("produtos")
 ) || [];
@@ -32,7 +34,45 @@ function salvarLocalStorage() {
 }
 
 
-// Obter produtos filtrados - V4
+// Sugestões automáticas de produtos
+function atualizarSugestoes() {
+
+    const termo = campoNome.value.toLowerCase().trim();
+
+    listaSugestoes.innerHTML = "";
+
+    // Encontrar produtos que começam com o texto digitado
+    const produtosEncontrados = listaDeProdutos.filter(produto =>
+        produto.nome.toLowerCase().startsWith(termo)
+    );
+
+    // Evitar sugestões repetidas
+    const nomesUnicos = [...new Set(
+        produtosEncontrados.map(produto => produto.nome)
+    )];
+
+    nomesUnicos.forEach(nome => {
+
+        const opcao = document.createElement("option");
+
+        opcao.value = nome;
+
+        listaSugestoes.appendChild(opcao);
+
+    });
+
+}
+
+
+// Atualizar sugestões enquanto digita o nome
+campoNome.addEventListener("input", function() {
+
+    atualizarSugestoes();
+
+});
+
+
+// Filtrar produtos da tabela - V4
 function obterProdutosFiltrados() {
 
     const termo = campoBusca.value.toLowerCase().trim();
@@ -72,7 +112,6 @@ function renderizarTabela() {
 
     tabela.innerHTML = "";
 
-    // Obter somente os produtos encontrados
     const produtosFiltrados = obterProdutosFiltrados();
 
     // Verificar se existem produtos encontrados
@@ -95,7 +134,7 @@ function renderizarTabela() {
     }
 
 
-    // Mostrar os produtos filtrados
+    // Mostrar produtos encontrados
     produtosFiltrados.forEach(produto => {
 
         const linha = document.createElement("tr");
@@ -146,6 +185,9 @@ function renderizarTabela() {
 
     totalEstoque.textContent =
         "Total em Estoque: " + formatarMoeda(total);
+
+    // Atualizar sugestões de produtos
+    atualizarSugestoes();
 
 }
 
@@ -220,7 +262,7 @@ formulario.addEventListener("submit", function(event) {
 });
 
 
-// Pesquisa em tempo real - evento input
+// Pesquisar na tabela enquanto digita
 campoBusca.addEventListener("input", function() {
 
     renderizarTabela();
@@ -235,8 +277,6 @@ tabela.addEventListener("click", function(event) {
 
     if (!id) return;
 
-
-    // Localizar produto pelo ID
     const indice = listaDeProdutos.findIndex(
         produto => produto.id === id
     );
@@ -256,6 +296,8 @@ tabela.addEventListener("click", function(event) {
         idEmEdicao = produto.id;
 
         botaoSalvar.textContent = "Salvar Alterações";
+
+        atualizarSugestoes();
 
         campoNome.focus();
 
@@ -321,4 +363,6 @@ botaoLimpar.addEventListener("click", function() {
 
 });
 
+
+// Mostrar produtos ao abrir a aplicação
 renderizarTabela();
