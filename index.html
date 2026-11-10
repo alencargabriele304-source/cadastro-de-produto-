@@ -16,8 +16,16 @@
 
         <h1>Cadastro de Produtos</h1>
 
+        <!-- Botão Conceito Bootstrap -->
+        <button type="button" id="btn-bootstrap" class="btn-primary">
+            Ver Conceito Bootstrap
+        </button>
+
         <!-- Formulário de entrada -->
         <form id="produto-form">
+
+            <!-- Mensagem inline de erro -->
+            <div id="mensagem-erro" role="alert"></div>
 
             <div class="form-group">
                 <label for="nome">Nome do Produto:</label>
@@ -113,6 +121,59 @@
             </tbody>
 
         </table>
+
+    </div>
+
+    <!-- Modal de confirmação -->
+    <div id="modal-confirmacao" class="modal">
+
+        <div class="modal-conteudo">
+
+            <h2>Confirmar exclusão</h2>
+
+            <p id="texto-confirmacao">
+                Tem certeza de que deseja continuar?
+            </p>
+
+            <div class="modal-botoes">
+
+                <button type="button" id="btn-cancelar" class="btn-secondary">
+                    Cancelar
+                </button>
+
+                <button type="button" id="btn-confirmar" class="btn-danger">
+                    Confirmar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modal Conceito Bootstrap -->
+    <div id="modal-bootstrap" class="modal">
+
+        <div class="modal-conteudo">
+
+            <h2>Conceito Bootstrap</h2>
+
+            <p>
+                O Bootstrap é uma biblioteca de CSS que facilita a criação
+                de interfaces modernas e responsivas.
+            </p>
+
+            <p>
+                Nossa equipe poderia utilizá-lo para criar botões,
+                formulários, tabelas e janelas modais de maneira mais rápida,
+                mantendo um visual organizado e adaptável.
+            </p>
+
+            <button type="button" id="btn-fechar-bootstrap" class="btn-primary">
+                Fechar
+            </button>
+
+        </div>
 
     </div>
 

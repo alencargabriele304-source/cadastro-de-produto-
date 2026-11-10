@@ -1,57 +1,173 @@
-// Elementos do HTML
+
+let listaDeProdutos = JSON.parse(localStorage.getItem("produtos")) || [];
+
+let idEmEdicao = null;
+let idPendenteExclusao = null;
+let limparTudoPendente = false;
+
+
+// ELEMENTOS HTML
+
 const formulario = document.getElementById("produto-form");
+
 const campoNome = document.getElementById("nome");
 const campoPreco = document.getElementById("preco");
 const campoQuantidade = document.getElementById("quantidade");
 const campoBusca = document.getElementById("campo-busca");
 
-const listaSugestoes = document.getElementById("sugestoes-produtos");
-
-const tabela = document.querySelector("#tabela-produtos tbody");
+const tabela = document.getElementById("tabela-produtos");
 const totalEstoque = document.getElementById("total-estoque");
-const mensagemBusca = document.getElementById("mensagem-busca");
 
-const botaoLimpar = document.getElementById("limpar-tabela");
+const mensagemErro = document.getElementById("mensagem-erro");
+
 const botaoSalvar = document.getElementById("btn-salvar");
+const botaoLimpar = document.getElementById("limpar-tabela");
 
 
-// Lista de produtos salva no navegador
-let listaDeProdutos = JSON.parse(
-    localStorage.getItem("produtos")
-) || [];
+// MENSAGENS DE SUCESSO E PRODUTOS VAZIOS
 
-let idEmEdicao = null;
+const mensagemSucesso = document.createElement("p");
+mensagemSucesso.id = "mensagem-sucesso";
+mensagemSucesso.style.display = "none";
+
+mensagemErro.after(mensagemSucesso);
+
+const mensagemVazia = document.createElement("p");
+mensagemVazia.id = "mensagem-vazia";
+mensagemVazia.style.display = "none";
+
+tabela.after(mensagemVazia);
 
 
-// Salvar produtos no localStorage
+// DESATIVAR VALIDAÇÃO NATIVA DO FORMULÁRIO
+
+formulario.setAttribute("novalidate", "");
+
+
+// MODAIS
+
+const modalConfirmacao = document.getElementById("modal-confirmacao");
+const modalBootstrap = document.getElementById("modal-bootstrap");
+
+const botaoConfirmar = document.getElementById("btn-confirmar");
+const botaoCancelar = document.getElementById("btn-cancelar");
+
+const botaoBootstrap = document.getElementById("btn-bootstrap");
+const botaoFecharBootstrap = document.getElementById("btn-fechar-bootstrap");
+
+const tituloConfirmacao = modalConfirmacao.querySelector("h2");
+const textoConfirmacao = document.getElementById("texto-confirmacao");
+
+
+// SALVAR NO LOCALSTORAGE
+
 function salvarLocalStorage() {
 
-    localStorage.setItem(
-        "produtos",
-        JSON.stringify(listaDeProdutos)
+    localStorage.setItem("produtos", JSON.stringify(listaDeProdutos));
+
+}
+
+
+// MENSAGENS INLINE
+
+function mostrarErro(mensagem) {
+
+    mensagemErro.textContent = mensagem;
+    mensagemErro.style.display = "block";
+
+    mensagemSucesso.style.display = "none";
+
+}
+
+
+function mostrarSucesso(mensagem) {
+
+    mensagemSucesso.textContent = mensagem;
+    mensagemSucesso.style.display = "block";
+
+    mensagemErro.style.display = "none";
+
+}
+
+
+function limparMensagens() {
+
+    mensagemErro.textContent = "";
+    mensagemSucesso.textContent = "";
+
+    mensagemErro.style.display = "none";
+    mensagemSucesso.style.display = "none";
+
+}
+
+
+// FORMATAÇÃO DE MOEDA
+
+function formatarMoeda(valor) {
+
+    return valor.toLocaleString("pt-BR", {
+
+        style: "currency",
+        currency: "BRL"
+
+    });
+
+}
+
+
+// CALCULAR TOTAL DO ESTOQUE
+
+function calcularTotalEstoque() {
+
+    return listaDeProdutos.reduce((total, produto) => {
+
+        return total + (produto.preco * produto.quantidade);
+
+    }, 0);
+
+}
+
+
+// FILTRAR PRODUTOS
+
+function obterProdutosFiltrados() {
+
+    const pesquisa = campoBusca.value.toLowerCase().trim();
+
+    return listaDeProdutos.filter(produto =>
+
+        produto.nome.toLowerCase().includes(pesquisa)
+
     );
 
 }
 
 
-// Sugestões automáticas de produtos
+// SUGESTÕES DE PRODUTOS
+
 function atualizarSugestoes() {
 
-    const termo = campoNome.value.toLowerCase().trim();
+    const listaSugestoes = document.getElementById("sugestoes-produtos");
+
+    const pesquisa = campoNome.value.toLowerCase().trim();
 
     listaSugestoes.innerHTML = "";
 
-    // Encontrar produtos que começam com o texto digitado
-    const produtosEncontrados = listaDeProdutos.filter(produto =>
-        produto.nome.toLowerCase().startsWith(termo)
-    );
+    const nomes = [
 
-    // Evitar sugestões repetidas
-    const nomesUnicos = [...new Set(
-        produtosEncontrados.map(produto => produto.nome)
-    )];
+        ...new Set(
 
-    nomesUnicos.forEach(nome => {
+            listaDeProdutos
+
+                .map(produto => produto.nome)
+
+                .filter(nome => nome.toLowerCase().startsWith(pesquisa))
+
+        )
+
+    ];
+
+    nomes.forEach(nome => {
 
         const opcao = document.createElement("option");
 
@@ -64,205 +180,405 @@ function atualizarSugestoes() {
 }
 
 
-// Atualizar sugestões enquanto digita o nome
-campoNome.addEventListener("input", function() {
+// RENDERIZAR TABELA
 
-    atualizarSugestoes();
-
-});
-
-
-// Filtrar produtos da tabela - V4
-function obterProdutosFiltrados() {
-
-    const termo = campoBusca.value.toLowerCase().trim();
-
-    return listaDeProdutos.filter(produto =>
-        produto.nome.toLowerCase().includes(termo)
-    );
-
-}
-
-
-// Calcular total com reduce() - V4
-function calcularTotalEstoque(produtos) {
-
-    return produtos.reduce((total, produto) => {
-
-        return total + (produto.preco * produto.quantidade);
-
-    }, 0);
-
-}
-
-
-// Formatar valores em reais
-function formatarMoeda(valor) {
-
-    return valor.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-    });
-
-}
-
-
-// Atualizar tabela
 function renderizarTabela() {
 
-    tabela.innerHTML = "";
+    const corpoTabela = tabela.querySelector("tbody");
+
+    corpoTabela.innerHTML = "";
 
     const produtosFiltrados = obterProdutosFiltrados();
 
-    // Verificar se existem produtos encontrados
-    if (produtosFiltrados.length === 0) {
-
-        if (listaDeProdutos.length === 0) {
-
-            mensagemBusca.textContent = "Nenhum produto cadastrado.";
-
-        } else {
-
-            mensagemBusca.textContent = "Nenhum produto encontrado.";
-
-        }
-
-    } else {
-
-        mensagemBusca.textContent = "";
-
-    }
-
-
-    // Mostrar produtos encontrados
     produtosFiltrados.forEach(produto => {
 
         const linha = document.createElement("tr");
 
-        const subtotal = produto.preco * produto.quantidade;
+        const valorTotal = produto.preco * produto.quantidade;
 
-        const colunaNome = document.createElement("td");
-        const colunaPreco = document.createElement("td");
-        const colunaQuantidade = document.createElement("td");
-        const colunaSubtotal = document.createElement("td");
-        const colunaAcoes = document.createElement("td");
+        linha.innerHTML = `
 
-        colunaNome.textContent = produto.nome;
-        colunaPreco.textContent = formatarMoeda(produto.preco);
-        colunaQuantidade.textContent = produto.quantidade;
-        colunaSubtotal.textContent = formatarMoeda(subtotal);
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
 
-        // Botão editar
-        const botaoEditar = document.createElement("button");
+            <td>
 
-        botaoEditar.textContent = "Editar";
-        botaoEditar.classList.add("btn-editar");
-        botaoEditar.dataset.id = produto.id;
+                <button class="botao-editar" data-acao="editar">
+                    Editar
+                </button>
 
-        // Botão excluir
-        const botaoExcluir = document.createElement("button");
+                <button class="botao-excluir-item" data-acao="excluir">
+                    Excluir
+                </button>
 
-        botaoExcluir.textContent = "Excluir";
-        botaoExcluir.classList.add("btn-excluir");
-        botaoExcluir.dataset.id = produto.id;
+            </td>
 
-        colunaAcoes.appendChild(botaoEditar);
-        colunaAcoes.appendChild(botaoExcluir);
+        `;
 
-        linha.appendChild(colunaNome);
-        linha.appendChild(colunaPreco);
-        linha.appendChild(colunaQuantidade);
-        linha.appendChild(colunaSubtotal);
-        linha.appendChild(colunaAcoes);
+        linha.cells[0].textContent = produto.nome;
+        linha.cells[1].textContent = formatarMoeda(produto.preco);
+        linha.cells[2].textContent = produto.quantidade;
+        linha.cells[3].textContent = formatarMoeda(valorTotal);
 
-        tabela.appendChild(linha);
+        linha.querySelector('[data-acao="editar"]')
+
+            .addEventListener("click", () => editarProduto(produto.id));
+
+        linha.querySelector('[data-acao="excluir"]')
+
+            .addEventListener("click", () => abrirModalExclusao(produto.id));
+
+        corpoTabela.appendChild(linha);
 
     });
 
 
-    // Calcular total somente dos produtos visíveis
-    const total = calcularTotalEstoque(produtosFiltrados);
+    // ATUALIZAR TOTAL DO ESTOQUE
 
     totalEstoque.textContent =
-        "Total em Estoque: " + formatarMoeda(total);
+        "Total em Estoque: " + formatarMoeda(calcularTotalEstoque());
 
-    // Atualizar sugestões de produtos
-    atualizarSugestoes();
+
+    // MENSAGEM DE TABELA VAZIA
+
+    if (produtosFiltrados.length === 0) {
+
+        mensagemVazia.textContent = listaDeProdutos.length === 0
+
+            ? "Nenhum produto cadastrado."
+
+            : "Nenhum produto encontrado.";
+
+        mensagemVazia.style.display = "block";
+
+    } else {
+
+        mensagemVazia.textContent = "";
+        mensagemVazia.style.display = "none";
+
+    }
 
 }
 
 
-// Cadastrar ou editar produto
+// CADASTRAR OU EDITAR PRODUTO
+
 formulario.addEventListener("submit", function(event) {
 
     event.preventDefault();
+
+    limparMensagens();
 
     const nome = campoNome.value.trim();
     const preco = Number(campoPreco.value);
     const quantidade = Number(campoQuantidade.value);
 
-    // Validar os campos
-    if (
-        nome === "" ||
-        !Number.isFinite(preco) ||
-        preco <= 0 ||
-        !Number.isInteger(quantidade) ||
-        quantidade <= 0
-    ) {
 
-        alert("Preencha todos os campos corretamente!");
+    // VALIDAÇÕES
+
+    if (nome === "") {
+
+        mostrarErro("Por favor, informe o nome do produto.");
+
+        campoNome.focus();
 
         return;
 
     }
 
 
-    // Criar objeto do produto
-    const produto = {
+    if (!Number.isFinite(preco) || preco <= 0) {
 
-        id: idEmEdicao !== null ? idEmEdicao : Date.now(),
+        mostrarErro("Informe um preço válido e maior que zero.");
 
-        nome: nome,
-        preco: preco,
-        quantidade: quantidade
+        campoPreco.focus();
 
-    };
+        return;
+
+    }
 
 
-    // Verificar se está editando ou cadastrando
+    if (!Number.isInteger(quantidade) || quantidade <= 0) {
+
+        mostrarErro("Informe uma quantidade inteira maior que zero.");
+
+        campoQuantidade.focus();
+
+        return;
+
+    }
+
+
+    // MODO DE EDIÇÃO
+
     if (idEmEdicao !== null) {
 
-        const indice = listaDeProdutos.findIndex(
+        const produto = listaDeProdutos.find(
+
             item => item.id === idEmEdicao
+
         );
 
-        if (indice !== -1) {
+        if (!produto) {
 
-            listaDeProdutos[indice] = produto;
+            mostrarErro("Não foi possível localizar o produto.");
+
+            return;
 
         }
+
+        produto.nome = nome;
+        produto.preco = preco;
+        produto.quantidade = quantidade;
 
         idEmEdicao = null;
 
         botaoSalvar.textContent = "Adicionar Produto";
 
+        mostrarSucesso("Produto atualizado com sucesso!");
+
+
     } else {
 
-        listaDeProdutos.push(produto);
+        // CADASTRO NOVO
+
+        const novoProduto = {
+
+            id: Date.now() + Math.random(),
+
+            nome: nome,
+
+            preco: preco,
+
+            quantidade: quantidade
+
+        };
+
+        listaDeProdutos.push(novoProduto);
+
+        mostrarSucesso("Produto cadastrado com sucesso!");
 
     }
 
 
     salvarLocalStorage();
 
-    formulario.reset();
-
     renderizarTabela();
+
+    atualizarSugestoes();
+
+    formulario.reset();
 
 });
 
 
-// Pesquisar na tabela enquanto digita
+// EDITAR PRODUTO
+
+function editarProduto(id) {
+
+    const produto = listaDeProdutos.find(item => item.id === id);
+
+    if (!produto) {
+
+        mostrarErro("Produto não encontrado.");
+
+        return;
+
+    }
+
+    limparMensagens();
+
+    campoNome.value = produto.nome;
+    campoPreco.value = produto.preco;
+    campoQuantidade.value = produto.quantidade;
+
+    idEmEdicao = id;
+
+    botaoSalvar.textContent = "Salvar Alterações";
+
+    campoNome.focus();
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
+
+
+// ABRIR MODAL DE EXCLUSÃO
+
+function abrirModalExclusao(id) {
+
+    idPendenteExclusao = id;
+
+    limparTudoPendente = false;
+
+    const produto = listaDeProdutos.find(item => item.id === id);
+
+    if (!produto) {
+
+        return;
+
+    }
+
+    tituloConfirmacao.textContent = "Confirmar exclusão";
+
+    textoConfirmacao.textContent =
+
+        `Deseja realmente excluir o produto "${produto.nome}"?`;
+
+    botaoConfirmar.textContent = "Confirmar";
+
+    modalConfirmacao.classList.add("aberto");
+
+    modalConfirmacao.setAttribute("aria-hidden", "false");
+
+    botaoCancelar.focus();
+
+}
+
+
+// BOTÃO LIMPAR TUDO
+
+botaoLimpar.addEventListener("click", function() {
+
+    limparMensagens();
+
+    if (listaDeProdutos.length === 0) {
+
+        mostrarErro("Não existem produtos para excluir.");
+
+        return;
+
+    }
+
+    idPendenteExclusao = null;
+
+    limparTudoPendente = true;
+
+    tituloConfirmacao.textContent = "Limpar todos os produtos";
+
+    textoConfirmacao.textContent =
+
+        "Tem certeza de que deseja excluir TODOS os produtos cadastrados? Essa ação não poderá ser desfeita.";
+
+    botaoConfirmar.textContent = "Sim, limpar tudo";
+
+    modalConfirmacao.classList.add("aberto");
+
+    modalConfirmacao.setAttribute("aria-hidden", "false");
+
+    botaoCancelar.focus();
+
+});
+
+
+// CONFIRMAR EXCLUSÃO
+
+botaoConfirmar.addEventListener("click", function() {
+
+    if (limparTudoPendente) {
+
+        listaDeProdutos = [];
+
+        if (idEmEdicao !== null) {
+
+            idEmEdicao = null;
+
+            formulario.reset();
+
+            botaoSalvar.textContent = "Adicionar Produto";
+
+        }
+
+        salvarLocalStorage();
+
+        renderizarTabela();
+
+        atualizarSugestoes();
+
+        fecharModalConfirmacao();
+
+        mostrarSucesso("Todos os produtos foram excluídos!");
+
+
+    } else if (idPendenteExclusao !== null) {
+
+        const produto = listaDeProdutos.find(
+
+            item => item.id === idPendenteExclusao
+
+        );
+
+        if (!produto) {
+
+            fecharModalConfirmacao();
+
+            mostrarErro("O produto não foi encontrado.");
+
+            return;
+
+        }
+
+        listaDeProdutos = listaDeProdutos.filter(
+
+            item => item.id !== idPendenteExclusao
+
+        );
+
+        if (idEmEdicao === idPendenteExclusao) {
+
+            idEmEdicao = null;
+
+            formulario.reset();
+
+            botaoSalvar.textContent = "Adicionar Produto";
+
+        }
+
+        salvarLocalStorage();
+
+        renderizarTabela();
+
+        atualizarSugestoes();
+
+        fecharModalConfirmacao();
+
+        mostrarSucesso("Produto excluído com sucesso!");
+
+    }
+
+});
+
+
+// CANCELAR EXCLUSÃO
+
+botaoCancelar.addEventListener("click", fecharModalConfirmacao);
+
+
+// FECHAR MODAL DE CONFIRMAÇÃO
+
+function fecharModalConfirmacao() {
+
+    modalConfirmacao.classList.remove("aberto");
+
+    modalConfirmacao.setAttribute("aria-hidden", "true");
+
+    idPendenteExclusao = null;
+
+    limparTudoPendente = false;
+
+}
+
+
+// FILTRO DINÂMICO
+
 campoBusca.addEventListener("input", function() {
 
     renderizarTabela();
@@ -270,99 +586,83 @@ campoBusca.addEventListener("input", function() {
 });
 
 
-// Editar e excluir produtos
-tabela.addEventListener("click", function(event) {
+// ATUALIZAR SUGESTÕES
 
-    const id = Number(event.target.dataset.id);
-
-    if (!id) return;
-
-    const indice = listaDeProdutos.findIndex(
-        produto => produto.id === id
-    );
-
-    if (indice === -1) return;
+campoNome.addEventListener("input", atualizarSugestoes);
 
 
-    // Editar produto
-    if (event.target.classList.contains("btn-editar")) {
+// MODAL BOOTSTRAP
 
-        const produto = listaDeProdutos[indice];
+botaoBootstrap.addEventListener("click", function() {
 
-        campoNome.value = produto.nome;
-        campoPreco.value = produto.preco;
-        campoQuantidade.value = produto.quantidade;
+    modalBootstrap.classList.add("aberto");
 
-        idEmEdicao = produto.id;
+    modalBootstrap.setAttribute("aria-hidden", "false");
 
-        botaoSalvar.textContent = "Salvar Alterações";
+    botaoFecharBootstrap.focus();
 
-        atualizarSugestoes();
-
-        campoNome.focus();
-
-    }
+});
 
 
-    // Excluir produto
-    if (event.target.classList.contains("btn-excluir")) {
+// FECHAR MODAL BOOTSTRAP
 
-        const confirmar = confirm(
-            "Deseja realmente excluir este produto?"
-        );
+function fecharModalBootstrap() {
 
-        if (confirmar) {
+    modalBootstrap.classList.remove("aberto");
 
-            listaDeProdutos.splice(indice, 1);
+    modalBootstrap.setAttribute("aria-hidden", "true");
 
-            if (idEmEdicao === id) {
+}
 
-                idEmEdicao = null;
 
-                formulario.reset();
+botaoFecharBootstrap.addEventListener(
 
-                botaoSalvar.textContent = "Adicionar Produto";
+    "click",
 
-            }
+    fecharModalBootstrap
 
-            salvarLocalStorage();
+);
 
-            renderizarTabela();
 
-        }
+modalConfirmacao.addEventListener("click", function(event) {
+
+    if (event.target === modalConfirmacao) {
+
+        fecharModalConfirmacao();
 
     }
 
 });
 
 
-// Limpar todos os produtos
-botaoLimpar.addEventListener("click", function() {
+modalBootstrap.addEventListener("click", function(event) {
 
-    const confirmar = confirm(
-        "Deseja realmente apagar todos os produtos?"
-    );
+    if (event.target === modalBootstrap) {
 
-    if (confirmar) {
-
-        listaDeProdutos = [];
-
-        idEmEdicao = null;
-
-        formulario.reset();
-
-        campoBusca.value = "";
-
-        botaoSalvar.textContent = "Adicionar Produto";
-
-        salvarLocalStorage();
-
-        renderizarTabela();
+        fecharModalBootstrap();
 
     }
 
 });
 
 
-// Mostrar produtos ao abrir a aplicação
+// FECHAR MODAIS COM ESC
+
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === "Escape") {
+
+        fecharModalConfirmacao();
+
+        fecharModalBootstrap();
+
+    }
+
+});
+
+
+// CARREGAR OS PRODUTOS AO ABRIR A PÁGINA
+
 renderizarTabela();
+
+atualizarSugestoes();

@@ -1,5 +1,7 @@
 
 
+/* CONFIGURAÇÕES GERAIS */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -11,13 +13,17 @@ body {
     background-color: #f4f6f9;
     color: #ffffff;
     padding: 20px;
+
     background-image: url("image.png");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+
     min-height: 100vh;
 }
 
+
+/* CONTAINER PRINCIPAL */
 
 .container {
     max-width: 850px;
@@ -30,6 +36,8 @@ body {
 }
 
 
+/* TÍTULO */
+
 h1 {
     text-align: center;
     margin-bottom: 25px;
@@ -37,6 +45,7 @@ h1 {
 }
 
 
+/* FORMULÁRIO */
 
 form {
     display: flex;
@@ -73,6 +82,8 @@ input:focus {
 }
 
 
+/* BOTÕES */
+
 button {
     padding: 10px 15px;
     font-size: 14px;
@@ -87,7 +98,6 @@ button:hover {
     transform: translateY(-1px);
 }
 
-
 .btn-primary {
     background-color: #000000;
     color: #ffffff;
@@ -99,6 +109,34 @@ button:hover {
     background-color: #292929;
 }
 
+.btn-danger {
+    background-color: #830303;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: #000000;
+}
+
+.btn-secondary {
+    background-color: #777777;
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background-color: #555555;
+}
+
+
+/* BOTÃO BOOTSTRAP */
+
+#btn-bootstrap {
+    display: block;
+    margin: 0 auto 20px;
+}
+
+
+/* RESUMO DO ESTOQUE */
 
 .resumo-container {
     display: flex;
@@ -117,16 +155,49 @@ button:hover {
 }
 
 
+/* PESQUISA */
 
-.btn-danger {
-    background-color: #830303;
+.busca-container {
+    margin-bottom: 15px;
+}
+
+
+/* MENSAGENS INLINE */
+
+#mensagem-erro {
+    display: none;
+    background-color: #ffe0e0;
+    color: #a00000;
+    border: 1px solid #a00000;
+    border-left: 5px solid #a00000;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#mensagem-sucesso {
+    display: none;
+    background-color: #e0ffe5;
+    color: #176b2c;
+    border: 1px solid #176b2c;
+    border-left: 5px solid #176b2c;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+#mensagem-vazia {
+    text-align: center;
+    padding: 15px;
     color: #ffffff;
+    font-weight: bold;
 }
 
-.btn-danger:hover {
-    background-color: #000000;
-}
 
+/* TABELA */
 
 table {
     width: 100%;
@@ -159,31 +230,128 @@ tbody tr:nth-child(odd) {
 }
 
 
-.btn-editar {
+/* BOTÃO EDITAR */
+
+.botao-editar {
     background-color: #b31e04;
     color: #ffffff;
     padding: 6px 10px;
     margin: 3px;
 }
 
-.btn-editar:hover {
+.botao-editar:hover {
     background-color: #830303;
 }
 
 
+/* BOTÃO EXCLUIR */
 
-.btn-remover {
+.botao-excluir-item {
     background-color: #222222;
     color: #ffffff;
     padding: 6px 10px;
     margin: 3px;
 }
 
-.btn-remover:hover {
+.botao-excluir-item:hover {
     background-color: #444444;
 }
 
 
+/* MODAIS */
+
+.modal {
+    display: none;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: #00000099;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    z-index: 1000;
+}
+
+
+/* MODAL ABERTO */
+
+.modal.aberto {
+    display: flex;
+}
+
+
+/* CONTEÚDO DO MODAL */
+
+.modal-conteudo {
+    background-color: #ffffff;
+    color: #222222;
+
+    width: 100%;
+    max-width: 450px;
+
+    padding: 25px;
+
+    border-radius: 10px;
+
+    box-shadow: 0 5px 20px #00000050;
+
+    text-align: center;
+
+    animation: aparecer 0.25s ease;
+}
+
+
+/* TÍTULO DO MODAL */
+
+.modal-conteudo h2 {
+    color: #b31e04;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+
+/* TEXTO DO MODAL */
+
+.modal-conteudo p {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+
+/* BOTÕES DO MODAL */
+
+.modal-botoes {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+
+/* ANIMAÇÃO DO MODAL */
+
+@keyframes aparecer {
+
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
 
 @media (max-width: 600px) {
 
@@ -218,11 +386,27 @@ tbody tr:nth-child(odd) {
         padding: 5px;
     }
 
-    .btn-editar,
-    .btn-remover {
+    .botao-editar,
+    .botao-excluir-item {
         padding: 5px;
         font-size: 11px;
         margin: 2px;
+    }
+
+    .modal-conteudo {
+        padding: 20px;
+    }
+
+    .modal-conteudo h2 {
+        font-size: 19px;
+    }
+
+    .modal-botoes {
+        flex-direction: column;
+    }
+
+    .modal-botoes button {
+        width: 100%;
     }
 
 }
